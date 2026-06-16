@@ -12,7 +12,13 @@ Power comes from a single Saft LS14250 cell (Li-SOCl₂, 3.6V, 1/2AA) — non-re
 
 ## Status
 
-Firmware complete and confirmed working end-to-end (BLE → HA BTHome integration). Sleep interval set to 5 minutes for deployment.
+Firmware complete and confirmed working end-to-end. HA native BTHome integration discovers the device within seconds — no gateway required with a Bluetooth-capable HA host.
+
+**Before deploying:** `SLEEP_INTERVAL_MS` in the sketch is currently `1s` (testing) — change to `(5UL * 60UL * 1000UL)` before final installation.
+
+**Range note:** Chest freezer lids significantly attenuate BLE. TX power is set to +8 dBm (nRF52840 max). If HA still can't see the device reliably from inside the freezer, place an [ESPHome Bluetooth proxy](https://esphome.io/components/bluetooth_proxy.html) (cheap ESP32) on top of the freezer, or use the Theengs Gateway fallback in `ha-bridge/`.
+
+A carrier PCB design is in progress — see [Carrier PCB](#carrier-pcb) below.
 
 ---
 
@@ -180,12 +186,37 @@ pos 10) — the onboard LED will fade in/out when the bootloader is active.
 
 ---
 
+---
+
+## Carrier PCB
+
+A KiCad carrier board is in progress. The nRF52840 module sockets into machine-pin headers; all peripherals connect via JST-PH connectors; passives (pull-up, voltage divider, bulk cap) are placed components on the board.
+
+Regenerate the netlist after any connectivity change:
+
+```
+python3 gen_freezer_netlist.py
+```
+
+**Key design decisions baked into the netlist:**
+- `JP1` interrupts the battery positive rail — pull the jumper before connecting USB for reprogramming
+- `R3` (4.7kΩ) pulls DS18B20 data to VBAT, not 3.3V — sensor is powered from the cell directly
+- `C1` (100µF low-ESR electrolytic) at the cell terminals dampens the LS14250's high internal impedance under BLE TX bursts
+- `C2` (10nF) decouples the ADC sense node at P0.02
+- J2 pin 2 (VCC) is sourced from P1.06 held HIGH — provides a 3.3V logic reference for the CP2102 debug adapter without requiring VCC rail (which is unavailable on battery-only power)
+
+> **Footprint warning:** The netlist uses functional pad names (`B+`, `B-`, `P0.24`, etc.) for U1. Verify these match the exact pad names in your chosen `Module:nice_nano_v2` footprint before importing into KiCad — a mismatch silently drops the connection with no DRC error.
+
+---
+
 ## Repository layout
 
 ```
 firmware/
   freezer_monitor/     Main Arduino sketch (temperature + BTHome v2 advertisement)
   board_bringup/       Diagnostic sketch used during hardware bring-up (historical)
+gen_freezer_netlist.py KiCad netlist generator for the carrier PCB
+freezer_monitor.net    Generated KiCad netlist (regenerate via gen_freezer_netlist.py)
 ha-bridge/             Theengs Gateway docker-compose (fallback if direct BT fails)
 docs/
   bthome/              BTHome v2 format reference
