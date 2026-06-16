@@ -198,6 +198,29 @@ Regenerate the netlist after any connectivity change:
 python3 gen_freezer_netlist.py
 ```
 
+If you want the module footprint orientation flipped so the USB/B+/B- end sits
+at the opposite end of the board, generate the alternate netlist:
+
+```
+python3 gen_freezer_netlist_usb_flipped.py
+```
+
+This writes `freezer_monitor_usb_flipped.net` and expects a footprint named
+`nice!nano clone:nice_nano_teyleten_usb_flipped` with the same pad names.
+
+Generate module footprints (normal + flipped variants):
+
+```
+python3 gen_nicenano_footprint.py
+```
+
+This writes:
+- `nice_nano_teyleten.kicad_mod`
+- `nice_nano_teyleten_usb_flipped.kicad_mod`
+
+The `usb_flipped` footprint is a true 180-degree rotation mapping (left/right
+swap plus top/bottom reversal), not a simple mirror.
+
 **Key design decisions baked into the netlist:**
 - `JP1` interrupts the battery positive rail — pull the jumper before connecting USB for reprogramming
 - `R3` (4.7kΩ) pulls DS18B20 data to VBAT, not 3.3V — sensor is powered from the cell directly

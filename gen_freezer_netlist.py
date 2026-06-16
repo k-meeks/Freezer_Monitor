@@ -36,9 +36,9 @@ KICAD_NETLIST_VERSION = "E"
 
 # ref -> (value, footprint, description)
 COMPONENTS = {
-    "U1":  ("nice!nano nRF52840", "Module:nice_nano_v2",
+    "U1":  ("nice!nano nRF52840", "nice!nano clone:nice_nano_teyleten",
             "Teyleten clone, socketed on machine-pin headers"),
-    "BT1": ("LS14250",            "BatteryHolder:Keystone_1011_1-2AA",
+    "BT1": ("LS14250",            "nice!nano clone:BAT_1011",
             "Saft Li-SOCl2 3.6V 1/2AA, polarity-keyed holder"),
     "R1":  ("1M",                 "Resistor_SMD:R_0805_2012Metric", "Divider high side"),
     "R2":  ("1M",                 "Resistor_SMD:R_0805_2012Metric", "Divider low side"),
@@ -47,7 +47,7 @@ COMPONENTS = {
             "Al-polymer radial THT, low-leakage low-ESR; size to actual part"),
     "C2":  ("10nF",               "Capacitor_SMD:C_0805_2012Metric",
             "SAADC sampling reservoir at P0.02"),
-    "J1":  ("DS18B20",            "Connector_JST:JST_PH_B3B-PH-K_1x03_P2.00mm",
+    "J1":  ("DS18B20",            "Connector_JST:JST_PH_B3B-PH-K_1x03_P2.00mm_Vertical",
             "Probe: 1=VDD 2=DATA 3=GND"),
     "J2":  ("SERIAL",             "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical",
             "Debug UART: 1=GND 2=VCC 3=TX 4=RX"),
@@ -57,10 +57,10 @@ COMPONENTS = {
 
 # net name -> list of (ref, pad)
 NETS = {
-    "CELL+": [("BT1", "1"), ("JP1", "1")],
+    "CELL+": [("BT1", "P"), ("JP1", "1")],
     "VBAT":  [("JP1", "2"), ("U1", "B+"), ("C1", "1"),
               ("R1", "1"), ("R3", "1"), ("J1", "1")],
-    "GND":   [("BT1", "2"), ("U1", "GND"), ("U1", "B-"), ("C1", "2"),
+    "GND":   [("BT1", "N"), ("U1", "GND"), ("U1", "B-"), ("C1", "2"),
               ("R2", "2"), ("C2", "2"), ("J1", "3"), ("J2", "1")],
     "DATA":  [("U1", "P0.24"), ("R3", "2"), ("J1", "2")],
     "SENSE": [("U1", "P0.02"), ("R1", "2"), ("R2", "1"), ("C2", "1")],

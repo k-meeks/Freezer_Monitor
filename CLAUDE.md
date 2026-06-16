@@ -55,6 +55,8 @@ Full pinout table and detailed notes: `docs/hardware/teyleten-nrf52840-promicro.
 - `firmware/freezer_monitor/freezer_monitor.ino` — main Arduino sketch: DS18B20 temp, battery voltage (P0.02 divider), BTHome v2 BLE advertisement, 5-min sleep cycle. **`SLEEP_INTERVAL_MS` is currently 1s (testing) — restore to 5 min before deployment.**
 - `firmware/board_bringup/board_bringup.ino` — diagnostic sketch from P0.13 rail/identity test (resolved). Historical reference only.
 - `gen_freezer_netlist.py` — data-driven KiCad netlist generator for the carrier PCB (v1.1.0). Edit `COMPONENTS`/`NETS` dicts and rerun to regenerate `freezer_monitor.net`. Includes a sanity check.
+- `gen_freezer_netlist_usb_flipped.py` — alternate netlist generator targeting a flipped module-footprint orientation (USB/B+/B- end on the opposite side). Writes `freezer_monitor_usb_flipped.net` and expects footprint `nice!nano clone:nice_nano_teyleten_usb_flipped`.
+- `gen_nicenano_footprint.py` — footprint generator for the Teyleten module; now emits both `nice_nano_teyleten.kicad_mod` and `nice_nano_teyleten_usb_flipped.kicad_mod` in one run.
 - `freezer_monitor.net` — generated KiCad netlist (v1.1.0). Do not hand-edit; regenerate via `gen_freezer_netlist.py`.
 - `ha-bridge/` — Theengs Gateway docker-compose config (fallback BLE→MQTT bridge if direct HA BT can't reach the freezer).
 - `docs/` — reference documentation (Home Assistant REST API, BTHome spec, board hardware notes).
@@ -76,6 +78,7 @@ Full pinout table and detailed notes: `docs/hardware/teyleten-nrf52840-promicro.
 - **CONFIRMED 2026-06-16**: HA native BTHome integration discovered `FreezerMonitor` within seconds on an N95 NUC with onboard BT. No Theengs Gateway needed under normal range conditions.
 - **CONFIRMED 2026-06-16**: chest freezer lid attenuates signal from -54 dBm to -82/-88 dBm. TX power bumped to +8 dBm (nRF52840 max) — impact on battery life is negligible (~0.5 mAh/year extra). Theengs Gateway / ESP32 BT proxy are fallbacks if signal remains marginal.
 - **Carrier PCB netlist** (2026-06-16): `gen_freezer_netlist.py` v1.1.0 generates KiCad-importable `freezer_monitor.net`. Key fix in v1.1.0: U1 B- must be explicitly tied to GND net — the `Module:nice_nano_v2` footprint defines B- as a separate named pad, not just another GND pin. Pad names in the netlist must match footprint pad names exactly (verify before import).
+- **Footprint flip semantics** (2026-06-16): `nice_nano_teyleten_usb_flipped.kicad_mod` must be generated as a true 180-degree rotation (swap sides + reverse order), not a top/bottom mirror. Correct result puts `B+` at bottom-left and `B-` at bottom-right in the flipped variant.
 
 ## Development process
 Standard reminder: update this file after every bugfix or feature addition, capturing new edge cases, changed logic/external behavior, and new options/flags. Keep entries terse — this file is a reference, not documentation.
