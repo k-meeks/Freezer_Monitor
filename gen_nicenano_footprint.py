@@ -7,17 +7,14 @@ Version:    1.1.1
 Date:       2026-06-16
 Author:     Kyle Meeks (UIHC) / generated with Claude
 Description:
-        Emits through-hole .kicad_mod footprints for the *specific* Teyleten
+        Emits a through-hole .kicad_mod footprint for the *specific* Teyleten
         nRF52840 board (NOT a generic nice!nano - this clone brings B+/B- out to
-        the edge header, which the genuine module does not).
+        the edge header, which the genuine module does not): nice_nano_teyleten.kicad_mod
 
-        This script writes both:
-            - nice_nano_teyleten.kicad_mod
-            - nice_nano_teyleten_usb_flipped.kicad_mod
-
-        The flipped variant keeps identical pad names and applies a true 180deg
-        rotation mapping (swap left/right + reverse top/bottom order) so the
-        USB/B+/B- end is at the opposite end of the board layout.
+        To mount the module rotated 180deg on the carrier (USB/B+/B- end on the
+        opposite side), just rotate the footprint instance in pcbnew (R key) -
+        rotation is a placement transform, not something that needs a second
+        footprint or netlist.
 
         Geometry is parametric. Verify ROW_SPACING against the physical board
         (outside-edge of a left pad to outside-edge of the opposite right pad,
@@ -38,11 +35,12 @@ Version history:
         1.1.0  2026-06-16  Emit both normal + USB-flipped footprint variants.
     1.1.1  2026-06-16  Fix flipped variant to true 180deg rotation
                (not top/bottom mirror only).
+        1.2.0  2026-06-17  Drop the USB-flipped variant - rotation belongs in
+               pcbnew (R key), not as a duplicate footprint/netlist to maintain.
 """
 
 # --- parameters --------------------------------------------------------------
 NAME        = "nice_nano_teyleten"
-FLIPPED_NAME = "nice_nano_teyleten_usb_flipped"
 PITCH       = 2.54     # mm, locked
 ROW_SPACING = 15.24    # mm (0.6") - VERIFY against board
 PINS        = 13
@@ -101,20 +99,13 @@ def build(name, left_pads, right_pads):
     out.append(line( cx, -cy,  cx,  cy, "F.CrtYd", 0.05))
     out.append(line( cx,  cy, -cx,  cy, "F.CrtYd", 0.05))
     out.append(line(-cx,  cy, -cx, -cy, "F.CrtYd", 0.05))
-    # pin-1 style marker: place triangle by B- so it's meaningful in both
-    # normal and rotated variants.
-    if "B-" in left_pads:
-        bminus_y = pin_y(left_pads.index("B-"))
-        mx = -ROW_SPACING/2.0 - PAD_DIA/2.0 - 0.4
-        out.append(line(mx-0.5, bminus_y-0.5, mx-0.5, bminus_y+0.5, "F.SilkS"))
-        out.append(line(mx-0.5, bminus_y-0.5, mx+0.3, bminus_y,     "F.SilkS"))
-        out.append(line(mx-0.5, bminus_y+0.5, mx+0.3, bminus_y,     "F.SilkS"))
-    else:
-        bminus_y = pin_y(right_pads.index("B-"))
-        mx = ROW_SPACING/2.0 + PAD_DIA/2.0 + 0.4
-        out.append(line(mx+0.5, bminus_y-0.5, mx+0.5, bminus_y+0.5, "F.SilkS"))
-        out.append(line(mx+0.5, bminus_y-0.5, mx-0.3, bminus_y,     "F.SilkS"))
-        out.append(line(mx+0.5, bminus_y+0.5, mx-0.3, bminus_y,     "F.SilkS"))
+    # pin-1 style marker: place triangle by B- (always left_pads - normal
+    # orientation only; rotate the footprint instance in pcbnew if needed).
+    bminus_y = pin_y(left_pads.index("B-"))
+    mx = -ROW_SPACING/2.0 - PAD_DIA/2.0 - 0.4
+    out.append(line(mx-0.5, bminus_y-0.5, mx-0.5, bminus_y+0.5, "F.SilkS"))
+    out.append(line(mx-0.5, bminus_y-0.5, mx+0.3, bminus_y,     "F.SilkS"))
+    out.append(line(mx-0.5, bminus_y+0.5, mx+0.3, bminus_y,     "F.SilkS"))
     # pads
     xL = -ROW_SPACING / 2.0
     xR =  ROW_SPACING / 2.0
@@ -137,13 +128,9 @@ if __name__ == "__main__":
     missing = need - set(names)
     print("netlist pins present:", "OK" if not missing else f"MISSING {missing}")
     normal = build(NAME, LEFT, RIGHT)
-    flipped = build(FLIPPED_NAME, list(reversed(RIGHT)), list(reversed(LEFT)))
 
     assert normal.count("(") == normal.count(")"), "normal footprint has unbalanced parens!"
-    assert flipped.count("(") == flipped.count(")"), "flipped footprint has unbalanced parens!"
 
     open(f"{NAME}.kicad_mod", "w").write(normal)
-    open(f"{FLIPPED_NAME}.kicad_mod", "w").write(flipped)
 
     print(f"paren balance OK; wrote {NAME}.kicad_mod ({len(normal)} bytes)")
-    print(f"paren balance OK; wrote {FLIPPED_NAME}.kicad_mod ({len(flipped)} bytes)")

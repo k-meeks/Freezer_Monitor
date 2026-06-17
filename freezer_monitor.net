@@ -1,8 +1,8 @@
 (export (version "E")
   (design
-    (source "gen_freezer_netlist_usb_flipped.py")
+    (source "gen_freezer_netlist.py")
     (date "2026-06-16")
-    (tool "gen_freezer_netlist_usb_flipped.py 1.0.0"))
+    (tool "gen_freezer_netlist.py 1.0.0"))
   (components
     (comp (ref "BT1")
       (value "LS14250")
@@ -42,8 +42,8 @@
       (description "OneWire pull-up to VBAT"))
     (comp (ref "U1")
       (value "nice!nano nRF52840")
-      (footprint "nice!nano clone:nice_nano_teyleten_usb_flipped")
-      (description "Teyleten clone, socketed; flipped USB-end orientation"))
+      (footprint "nice!nano clone:nice_nano_teyleten")
+      (description "Teyleten clone, socketed on machine-pin headers"))
   )
   (nets
     (net (code "1") (name "CELL+")

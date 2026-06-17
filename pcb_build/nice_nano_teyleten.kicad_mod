@@ -1,4 +1,4 @@
-(footprint "nice_nano_teyleten_usb_flipped"
+(footprint "nice_nano_teyleten"
 	(version 20240108)
 	(generator "gen_nicenano_footprint.py")
 	(generator_version "1.1.1")
@@ -6,7 +6,7 @@
 	(attr through_hole)
 	(fp_text reference "U**" (at 0 -17.665) (layer "F.SilkS")
 		(effects (font (size 1 1) (thickness 0.15))))
-	(fp_text value "nice_nano_teyleten_usb_flipped" (at 0 17.665) (layer "F.Fab")
+	(fp_text value "nice_nano_teyleten" (at 0 17.665) (layer "F.Fab")
 		(effects (font (size 1 1) (thickness 0.15))))
 	(fp_line (start -8.920 -16.465) (end 8.920 -16.465)
 		(stroke (width 0.1) (type solid)) (layer "F.Fab"))
@@ -32,163 +32,163 @@
 		(stroke (width 0.05) (type solid)) (layer "F.CrtYd"))
 	(fp_line (start -9.170 16.715) (end -9.170 -16.715)
 		(stroke (width 0.05) (type solid)) (layer "F.CrtYd"))
-	(fp_line (start 9.370 14.740) (end 9.370 15.740)
+	(fp_line (start -9.370 -15.740) (end -9.370 -14.740)
 		(stroke (width 0.12) (type solid)) (layer "F.SilkS"))
-	(fp_line (start 9.370 14.740) (end 8.570 15.240)
+	(fp_line (start -9.370 -15.740) (end -8.570 -15.240)
 		(stroke (width 0.12) (type solid)) (layer "F.SilkS"))
-	(fp_line (start 9.370 15.740) (end 8.570 15.240)
+	(fp_line (start -9.370 -14.740) (end -8.570 -15.240)
 		(stroke (width 0.12) (type solid)) (layer "F.SilkS"))
-	(pad "P0.10" thru_hole circle
+	(pad "B-" thru_hole rect
 		(at -7.620 -15.240)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P0.09" thru_hole circle
+	(pad "P0.06" thru_hole circle
 		(at -7.620 -12.700)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P1.11" thru_hole circle
+	(pad "P0.08" thru_hole circle
 		(at -7.620 -10.160)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P1.13" thru_hole circle
+	(pad "GND" thru_hole circle
 		(at -7.620 -7.620)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P1.15" thru_hole circle
+	(pad "GND" thru_hole circle
 		(at -7.620 -5.080)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P0.02" thru_hole circle
+	(pad "P0.17" thru_hole circle
 		(at -7.620 -2.540)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P0.29" thru_hole circle
+	(pad "P0.20" thru_hole circle
 		(at -7.620 0.000)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P0.31" thru_hole circle
+	(pad "P0.22" thru_hole circle
 		(at -7.620 2.540)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "VCC" thru_hole circle
+	(pad "P0.24" thru_hole circle
 		(at -7.620 5.080)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "RST" thru_hole circle
+	(pad "P1.00" thru_hole circle
 		(at -7.620 7.620)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "GND" thru_hole circle
+	(pad "P0.11" thru_hole circle
 		(at -7.620 10.160)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "RAW" thru_hole circle
+	(pad "P1.04" thru_hole circle
 		(at -7.620 12.700)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "B+" thru_hole circle
+	(pad "P1.06" thru_hole circle
 		(at -7.620 15.240)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P1.06" thru_hole circle
+	(pad "B+" thru_hole circle
 		(at 7.620 -15.240)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P1.04" thru_hole circle
+	(pad "RAW" thru_hole circle
 		(at 7.620 -12.700)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P0.11" thru_hole circle
+	(pad "GND" thru_hole circle
 		(at 7.620 -10.160)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P1.00" thru_hole circle
+	(pad "RST" thru_hole circle
 		(at 7.620 -7.620)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P0.24" thru_hole circle
+	(pad "VCC" thru_hole circle
 		(at 7.620 -5.080)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P0.22" thru_hole circle
+	(pad "P0.31" thru_hole circle
 		(at 7.620 -2.540)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P0.20" thru_hole circle
+	(pad "P0.29" thru_hole circle
 		(at 7.620 0.000)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P0.17" thru_hole circle
+	(pad "P0.02" thru_hole circle
 		(at 7.620 2.540)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "GND" thru_hole circle
+	(pad "P1.15" thru_hole circle
 		(at 7.620 5.080)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "GND" thru_hole circle
+	(pad "P1.13" thru_hole circle
 		(at 7.620 7.620)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P0.08" thru_hole circle
+	(pad "P1.11" thru_hole circle
 		(at 7.620 10.160)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "P0.06" thru_hole circle
+	(pad "P0.09" thru_hole circle
 		(at 7.620 12.700)
 		(size 1.7 1.7)
 		(drill 1.0)
 		(layers "*.Cu" "*.Mask")
 	)
-	(pad "B-" thru_hole rect
+	(pad "P0.10" thru_hole circle
 		(at 7.620 15.240)
 		(size 1.7 1.7)
 		(drill 1.0)
