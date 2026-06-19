@@ -3,15 +3,10 @@
  *
  * Board: Teyleten Pro Micro nRF52840 (nice!nano v2 clone)
  *   - Arduino core: Adafruit nRF52 + Community Add-on (nice!nano-family board)
- *   - Pin notes / open questions: docs/hardware/teyleten-nrf52840-promicro.md
+ *   - Pin notes: docs/hardware/teyleten-nrf52840-promicro.md
  *
  * Cycle: wake -> read DS18B20 -> read battery -> advertise BTHome v2 packet
  *        -> sleep -> repeat
- *
- * DS18B20 is wired directly to B+/B- (always powered) - CONFIRMED 2026-06-15
- * that P0.13 (the originally planned sensor power-switch pin) isn't broken
- * out on this board's header, so power-gating was dropped. DS18B20 idle draw
- * is negligible against the LS14250's capacity.
  *
  * BTHome v2 reference: docs/bthome/format-v2.md
  */
@@ -51,7 +46,7 @@
 // ---------------------------------------------------------------------------
 // Timing
 // ---------------------------------------------------------------------------
-#define SLEEP_INTERVAL_MS     (1UL * 1000UL)          // TESTING: 5s. Restore to 5 min before deployment.
+#define SLEEP_INTERVAL_MS     (5UL * 60UL * 1000UL)   // 5 minutes
 #define ADVERTISE_DURATION_MS 2000                   // how long to advertise each cycle
 
 // ---------------------------------------------------------------------------
@@ -67,12 +62,6 @@
 #define BTHOME_ID_BATTERY     0x01
 #define BTHOME_ID_TEMPERATURE 0x02
 
-// TESTING: debug output via Serial1 (TX = left side position 12 / P0.06) to an
-// external USB-to-serial adapter, so this can run on the LS14250 (which also
-// powers the DS18B20 via B+/B-) without needing the board's own USB connected.
-// Remove once BLE advertising is confirmed working end-to-end.
-#define DBG_PRINT(...)   Serial1.print(__VA_ARGS__)
-#define DBG_PRINTLN(...) Serial1.println(__VA_ARGS__)
 
 OneWire oneWire(ONEWIRE_PIN);
 DallasTemperature sensors(&oneWire);
@@ -80,7 +69,6 @@ DallasTemperature sensors(&oneWire);
 uint8_t packetId = 0;
 
 void setup() {
-  Serial1.begin(115200);
   analogReadResolution(14);
 
   sensors.begin();
@@ -102,13 +90,6 @@ void loop() {
   float tempC = readTemperatureC();
   float battV = readBatteryVoltage();
   uint8_t batteryPct = readBatteryPercent(battV);
-
-  DBG_PRINT("temp C: ");
-  DBG_PRINT(tempC);
-  DBG_PRINT("   battery V: ");
-  DBG_PRINT(battV);
-  DBG_PRINT("   battery %: ");
-  DBG_PRINTLN(batteryPct);
 
   sendBTHomeAdvertisement(tempC, batteryPct);
   delay(ADVERTISE_DURATION_MS);
@@ -161,10 +142,7 @@ void sendBTHomeAdvertisement(float tempC, uint8_t batteryPct) {
   Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
   Bluefruit.Advertising.addData(BLE_GAP_AD_TYPE_SERVICE_DATA, payload, sizeof(payload));
 
-  // TODO: VERIFY - confirm setInterval()/setType() against the installed
-  // Bluefruit library version. Non-connectable advertising
-  // (BLE_GAP_ADV_TYPE_ADV_NONCONN_IND) is preferred for a beacon-only device.
-  // Interval units are 0.625ms, so 160 = 100ms.
+  // Interval units are 0.625ms; 160 = 100ms.
   Bluefruit.Advertising.setInterval(160, 160);
   Bluefruit.Advertising.start(0); // 0 = no timeout; stopped manually after ADVERTISE_DURATION_MS
 }

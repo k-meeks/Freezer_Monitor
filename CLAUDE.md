@@ -1,9 +1,11 @@
 # Freezer Monitor
 
 ## What this project is
-A battery-powered temperature monitor that lives inside a chest freezer. An nRF52840 reads a DS18B20 temperature sensor and broadcasts the reading over BLE using the BTHome v2 format. Home Assistant picks it up directly via its built-in BTHome integration (native BT on the HA host — no gateway required). Theengs Gateway on a nearby NAS is a documented fallback for range issues. Power comes from a Saft LS14250 Li-SOCl2 cell (3.6V, primary/non-rechargeable) that is manually replaced when depleted — battery life is the dominant design constraint throughout. A carrier PCB design (KiCad netlist) is in progress to replace hand-wired headers with proper JST connectors and on-board passives.
+A battery-powered temperature monitor that lives inside a chest freezer. An nRF52840 reads a DS18B20 temperature sensor and broadcasts the reading over BLE using the BTHome v2 format. **CONFIRMED 2026-06-19: deployed and running live** — board is inside the freezer, waking every 5 minutes, and a BT proxy ([k-meeks/linux_bt_proxy](https://github.com/k-meeks/linux_bt_proxy), a fork the user bug-fixed and runs on a Linux host) reliably relays BTHome events to Home Assistant, with battery and temperature tracked continuously. Theengs Gateway on a nearby NAS remains a documented fallback for range issues. Power comes from a Saft LS14250 Li-SOCl2 cell (3.6V, primary/non-rechargeable) that is manually replaced when depleted — battery life is the dominant design constraint throughout. Carrier PCB ordered 2026-06-18; awaiting boards for assembly and testing (current deployment is on the bench-wired prototype). Firmware complete. Current work: external alerting system (GCP + voip.ms).
 
 Personal project. No git actions requested from Claude (user manages git). No daily-log time tracking for this project.
+
+Sibling project: [AcuRite_Bridge](../AcuRite_Bridge/) (ESP32-C3 + RX470C, decoding AcuRite 00515M sensor broadcasts) — same multi-site family-monitoring intent, deliberately a separate repo since there's no shared code/toolchain between an nRF52840/BLE board and an ESP32-C3/433MHz one. A third repo is planned for the shared GCP/voip.ms alerting backend once both bridges have something to feed it.
 
 ## Usage
 Firmware confirmed working end-to-end. Build setup:
@@ -15,7 +17,7 @@ Firmware confirmed working end-to-end. Build setup:
 3. Select board: **Nice Keyboard's nice!nano** (`nice_nano`, from Community package) — CONFIRMED correct for this clone.
 4. Install libraries: `OneWire`, `DallasTemperature` (Bluefruit BLE comes with the Adafruit nRF52 core).
 5. Open `firmware/freezer_monitor/freezer_monitor.ino`, build, flash via UF2 bootloader (double-tap RST).
-6. **Before deployment:** set `SLEEP_INTERVAL_MS` back to `(5UL * 60UL * 1000UL)` — currently `1UL * 1000UL` (1s) for testing.
+6. Firmware is complete and deployed — `SLEEP_INTERVAL_MS` is `(5UL * 60UL * 1000UL)` (5 min), Serial1 debug scaffolding removed.
 
 HA setup: Settings → Devices & Services → Add Integration → BTHome. Device appears as `FreezerMonitor`.
 
@@ -30,7 +32,7 @@ HA setup: Settings → Devices & Services → Add Integration → BTHome. Device
 - New physical pin-reference convention (easier than silkscreen labels): each header row is numbered **1-13, pin 1 = end farthest from the USB-C connector, pin 13 = the `B-`/`B+` pad itself**. Full left/right table in `docs/hardware/teyleten-nrf52840-promicro.md`.
 - **`PIN_VBAT`/A7 (P0.31) and A2 (P0.04) are floating/unusable** — CONFIRMED 2026-06-15, raw ADC readings were pure noise uncorrelated with actual battery voltage on this clone (no internal VBAT divider). Battery voltage is instead read via an **external divider**: two ~1MΩ resistors in series from `B+` to `GND`, midpoint wired to `P0.02`/A0 (right side, position 6). Calibrated empirically against a multimeter (B+=3.56V at raw≈8030) — see `BATT_SCALE` in `firmware/freezer_monitor/freezer_monitor.ino`. ~1.8µA continuous draw, negligible.
 - **HA native BTHome integration confirmed working** (2026-06-16) — HA on an Intel N95 NUC with onboard BT picks up `FreezerMonitor` advertisements directly, no Theengs Gateway needed as long as HA's BT radio can reach the device.
-- **Chest freezer lid attenuates BLE signal significantly** — confirmed 2026-06-16: signal drops from -54 dBm on desk to -82/-88 dBm in basement when device is inside freezer. TX power bumped to max (+8 dBm) to compensate. Theengs Gateway on nearby NAS is the fallback if direct BT remains marginal. An ESP32 BT proxy on top of the freezer is the other fallback.
+- **Chest freezer lid attenuates BLE signal significantly** — confirmed 2026-06-16: signal drops from -54 dBm on desk to -82/-88 dBm in basement when device is inside freezer. TX power bumped to max (+8 dBm) to compensate. **CONFIRMED 2026-06-19: a Linux BT proxy is deployed near the freezer and reliably relays BTHome events to HA** — this is the active path, not just a fallback. Proxy is [k-meeks/linux_bt_proxy](https://github.com/k-meeks/linux_bt_proxy), a fork the user heavily bug-fixed, running on a Linux host (not ESP32). Theengs Gateway on nearby NAS remains an untested fallback if the proxy path ever has issues.
 - **P1.06 (left pos 1, Arduino pin 38) used as VREF** — driven HIGH in firmware (`pinMode(38, OUTPUT); digitalWrite(38, HIGH)`) to provide a 3.3V logic reference on the serial debug header. Carrier PCB routes P1.06 → J2 pin 2 (VREF). CP2102 draws negligible current from this GPIO.
 - (Add Theengs Gateway config quirks here if/when the fallback path is needed.)
 
@@ -52,7 +54,7 @@ When presenting numbered lists of options to the user, the count must never be e
 Full pinout table and detailed notes: `docs/hardware/teyleten-nrf52840-promicro.md`. Replication guide: `README.md`.
 
 ## Code structure
-- `firmware/freezer_monitor/freezer_monitor.ino` — main Arduino sketch: DS18B20 temp, battery voltage (P0.02 divider), BTHome v2 BLE advertisement, 5-min sleep cycle. **`SLEEP_INTERVAL_MS` is currently 1s (testing) — restore to 5 min before deployment.**
+- `firmware/freezer_monitor/freezer_monitor.ino` — main Arduino sketch: DS18B20 temp, battery voltage (P0.02 divider), BTHome v2 BLE advertisement, 5-min sleep cycle. Firmware complete.
 - `firmware/board_bringup/board_bringup.ino` — diagnostic sketch from P0.13 rail/identity test (resolved). Historical reference only.
 - `gen_freezer_netlist.py` — data-driven KiCad netlist generator for the carrier PCB (v1.1.0). Edit `COMPONENTS`/`NETS` dicts and rerun to regenerate `freezer_monitor.net`. Includes a sanity check.
 - `gen_nicenano_footprint.py` — footprint generator for the Teyleten module; emits `nice_nano_teyleten.kicad_mod`. Mounting it rotated 180° on the carrier is a pcbnew placement choice (R key) — not a separate footprint/netlist. See [[no-flipped-footprint-variant]].
@@ -107,9 +109,10 @@ Open/undesigned: exact `/events` and `/check` endpoint contracts, ESP32 bridge f
 - **CONFIRMED 2026-06-15**: first `requestTemperatures()`/`getTempCByIndex()` right after `sensors.begin()` reliably returns -127 (DEVICE_DISCONNECTED_C). Fixed with a throwaway read in `setup()` before `loop()` starts — verified by pulling and reinserting the battery: all readings valid immediately, no -127.
 - **CONFIRMED 2026-06-15**: battery voltage via the external P0.02 divider tracks real changes accurately — a voltage dip from connecting a load and recovery afterward both showed up correctly in `readBatteryVoltage()`. `readBatteryPercent()` does a linear map between `BATT_FULL_V` (3.6V) and `BATT_EMPTY_V` (2.0V), reads near-100% for most of LS14250's life, falls quickly near the cliff.
 - **CONFIRMED 2026-06-16**: HA native BTHome integration discovered `FreezerMonitor` within seconds on an N95 NUC with onboard BT. No Theengs Gateway needed under normal range conditions.
-- **CONFIRMED 2026-06-16**: chest freezer lid attenuates signal from -54 dBm to -82/-88 dBm. TX power bumped to +8 dBm (nRF52840 max) — impact on battery life is negligible (~0.5 mAh/year extra). Theengs Gateway / ESP32 BT proxy are fallbacks if signal remains marginal.
+- **CONFIRMED 2026-06-16**: chest freezer lid attenuates signal from -54 dBm to -82/-88 dBm. TX power bumped to +8 dBm (nRF52840 max) — impact on battery life is negligible (~0.5 mAh/year extra).
+- **CONFIRMED 2026-06-19**: [k-meeks/linux_bt_proxy](https://github.com/k-meeks/linux_bt_proxy) (forked, bug-fixed by user) deployed on a Linux host near the freezer as the active BT→HA bridge — reliably relays BTHome events despite the lid attenuation above. Theengs Gateway remains an untested fallback if this proxy path ever has issues.
 - **Carrier PCB netlist** (2026-06-16): `gen_freezer_netlist.py` v1.1.0 generates KiCad-importable `freezer_monitor.net`. Key fix in v1.1.0: U1 B- must be explicitly tied to GND net — the `Module:nice_nano_v2` footprint defines B- as a separate named pad, not just another GND pin. Pad names in the netlist must match footprint pad names exactly (verify before import).
-- **Dropped the flipped footprint/netlist variant** (2026-06-17): `gen_freezer_netlist_usb_flipped.py` and the `nice_nano_teyleten_usb_flipped` footprint were removed — KiCad netlists encode connectivity only (ref+pad name), never XY/rotation, so the "flipped" netlist was byte-identical to the original except U1's footprint string. Mounting U1 rotated 180° is a pcbnew placement choice (R key) on the single `nice_nano_teyleten` footprint, not something requiring a duplicate footprint or netlist generator to maintain.
+- **Carrier PCB (ordered 2026-06-18)**: The manufactured board uses `nice_nano_teyleten_usb_flipped` as the U1 footprint (per pcb_build .rpt). The generator scripts reference `nice_nano_teyleten` — this discrepancy only matters if you re-import the netlist into the existing KiCad project. Board is awaiting delivery for assembly and testing.
 
 ## Development process
 Standard reminder: update this file after every bugfix or feature addition, capturing new edge cases, changed logic/external behavior, and new options/flags. Keep entries terse — this file is a reference, not documentation.

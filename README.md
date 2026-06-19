@@ -12,11 +12,9 @@ Power comes from a single Saft LS14250 cell (Li-SOCl₂, 3.6V, 1/2AA) — non-re
 
 ## Status
 
-Firmware complete and confirmed working end-to-end. HA native BTHome integration discovers the device within seconds — no gateway required with a Bluetooth-capable HA host.
+**Deployed and running live** — board is inside the freezer, waking every 5 minutes, with battery and temperature tracked continuously in HA.
 
-**Before deploying:** `SLEEP_INTERVAL_MS` in the sketch is currently `1s` (testing) — change to `(5UL * 60UL * 1000UL)` before final installation.
-
-**Range note:** Chest freezer lids significantly attenuate BLE. TX power is set to +8 dBm (nRF52840 max). If HA still can't see the device reliably from inside the freezer, place an [ESPHome Bluetooth proxy](https://esphome.io/components/bluetooth_proxy.html) (cheap ESP32) on top of the freezer, or use the Theengs Gateway fallback in `ha-bridge/`.
+**Range note:** Chest freezer lids significantly attenuate BLE (observed drop from -54 dBm on the desk to -82/-88 dBm inside the freezer). TX power is set to +8 dBm (nRF52840 max) to compensate. The active bridge for range is [linux_bt_proxy](https://github.com/k-meeks/linux_bt_proxy) — a fork running on a Linux host near the freezer that relays BTHome advertisements to HA. Theengs Gateway (`ha-bridge/`) remains an untested fallback if that proxy path ever has issues.
 
 A carrier PCB design is in progress — see [Carrier PCB](#carrier-pcb) below.
 
@@ -180,9 +178,9 @@ pos 10) — the onboard LED will fade in/out when the bootloader is active.
 4. The device exposes: temperature (°C), battery (%), packet ID.
 
 > **Range note:** Chest freezer metal lids significantly attenuate BLE signal.
-> If HA can't see the device from inside the freezer, place a Bluetooth proxy
-> (cheap ESP32 running ESPHome) on top of the freezer, or use Theengs Gateway
-> on a nearby host to bridge BLE → MQTT → HA.
+> This deployment uses [linux_bt_proxy](https://github.com/k-meeks/linux_bt_proxy)
+> on a nearby Linux host to relay BTHome advertisements to HA. Theengs Gateway
+> (`ha-bridge/`) is an untested fallback if that proxy path ever has issues.
 
 ---
 
@@ -309,7 +307,7 @@ firmware/
   board_bringup/       Diagnostic sketch used during hardware bring-up (historical)
 gen_freezer_netlist.py KiCad netlist generator for the carrier PCB
 freezer_monitor.net    Generated KiCad netlist (regenerate via gen_freezer_netlist.py)
-ha-bridge/             Theengs Gateway docker-compose (fallback if direct BT fails)
+ha-bridge/             Theengs Gateway docker-compose (untested fallback; active bridge is linux_bt_proxy, a separate repo)
 docs/
   bthome/              BTHome v2 format reference
   hardware/            Board pinout, confirmed quirks, battery notes
